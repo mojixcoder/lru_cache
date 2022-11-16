@@ -22,7 +22,7 @@ func NewDoublyLinkedList() *DoublyLinkedList {
 	return &DoublyLinkedList{}
 }
 
-// Val returns the node's value.
+// GetVal returns the node's value.
 func (n *Node) GetVal() any {
 	return n.value
 }
