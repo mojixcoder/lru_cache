@@ -18,7 +18,7 @@ type (
 		TimeoutResp         []byte
 		InternalServerError []byte
 		KeyEmptyResp        []byte
-		SetResp             []byte
+		OKResp              []byte
 	}
 
 	// GetResponse is the response of get handler.
@@ -42,7 +42,7 @@ func newApp() *App {
 		TimeoutResp:         []byte(`{"detail": "timeout"}`),
 		InternalServerError: []byte(`{"detail": "internal server error"}`),
 		KeyEmptyResp:        []byte(`{"detail": "key is required"}`),
-		SetResp:             []byte(`{"message": "ok"}`),
+		OKResp:              []byte(`{"message": "ok"}`),
 	}
 	return &app
 }
@@ -111,9 +111,25 @@ func (app *App) Set(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusGatewayTimeout)
 		w.Write(app.TimeoutResp)
 		log.Println("error in setting key, reason:", err)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(app.SetResp)
+	w.Write(app.OKResp)
 	log.Println("SET: ok")
+}
+
+// Flush flushes the whole cache.
+func (app *App) Flush(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := app.cache.Flush(r.Context()); err != nil {
+		w.WriteHeader(http.StatusGatewayTimeout)
+		w.Write(app.TimeoutResp)
+		log.Println("error in flushing cache, reason:", err)
+	} else {
+		w.WriteHeader(http.StatusOK)
+		w.Write(app.OKResp)
+		log.Println("FLUSH: ok")
+	}
 }
