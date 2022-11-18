@@ -122,11 +122,11 @@ func TestNewApp(t *testing.T) {
 	assert.Equal(t, []byte(`{"detail": "internal server error"}`), app.InternalServerError)
 	assert.Equal(t, []byte(`{"detail": "key is required"}`), app.KeyEmptyResp)
 	assert.Equal(t, []byte(`{"detail": "not found"}`), app.NotFoundResp)
-	assert.Equal(t, []byte(`{"message": "ok"}`), app.SetResp)
+	assert.Equal(t, []byte(`{"message": "ok"}`), app.OKResp)
 	assert.Equal(t, []byte(`{"detail": "timeout"}`), app.TimeoutResp)
 }
 
-func TestSetTimeout(t *testing.T) {
+func TestTimeout(t *testing.T) {
 	r := newRouter()
 
 	testcases := []struct {
@@ -136,6 +136,7 @@ func TestSetTimeout(t *testing.T) {
 	}{
 		{name: "get", reqUrl: "/get/10", method: http.MethodGet},
 		{name: "set", reqUrl: "/set", method: http.MethodPost},
+		{name: "flush", reqUrl: "/flush", method: http.MethodGet},
 	}
 
 	for _, tc := range testcases {
@@ -166,6 +167,42 @@ func TestSetTimeout(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusGatewayTimeout, rr.Code)
+		})
+	}
+}
+
+func TestFlush(t *testing.T) {
+	r := newRouter()
+
+	setToCache(t, r, "10", 10)
+
+	testcases := []struct {
+		name       string
+		statusCode int
+		reqUrl     string
+		resp       []byte
+	}{
+		{name: "get_ok", statusCode: http.StatusOK, reqUrl: "/get/10", resp: []byte(`{"key":"10","value":10}`)},
+		{name: "ok", statusCode: http.StatusOK, reqUrl: "/flush", resp: []byte(`{"message": "ok"}`)},
+		{name: "not_found", statusCode: http.StatusNotFound, reqUrl: "/get/10", resp: []byte(`{"detail": "not found"}`)},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			rr := httptest.NewRecorder()
+
+			req, err := http.NewRequest(http.MethodGet, tc.reqUrl, nil)
+			assert.NoError(t, err)
+
+			r.ServeHTTP(rr, req)
+
+			assert.Equal(t, tc.statusCode, rr.Code)
+			assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
+
+			resp, err := ioutil.ReadAll(rr.Body)
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.resp, resp)
 		})
 	}
 }

@@ -121,3 +121,33 @@ func (c *Cache) set(key string, val any) {
 		c.storage[key] = node
 	}
 }
+
+// Flush resets the cache.
+func (c *Cache) Flush(ctx context.Context) error {
+	if ctx == nil {
+		panic("Context cannot be nil.")
+	}
+
+	done := make(chan bool, 1)
+
+	go func() {
+		c.flush()
+		done <- true
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-done:
+		return nil
+	}
+}
+
+// flush resets the cache.
+func (c *Cache) flush() {
+	c.m.Lock()
+	defer c.m.Unlock()
+
+	c.storage = make(map[string]*linkedlist.Node)
+	c.list = linkedlist.NewDoublyLinkedList()
+}

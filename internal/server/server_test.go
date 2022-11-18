@@ -22,6 +22,7 @@ func TestNewRouter(t *testing.T) {
 	}{
 		{name: "get", reqUrl: "/get/10", method: http.MethodGet},
 		{name: "set", reqUrl: "/set", method: http.MethodPost},
+		{name: "flush", reqUrl: "/flush", method: http.MethodGet},
 	}
 
 	for _, tc := range testcases {
@@ -56,6 +57,7 @@ func TestRunServer(t *testing.T) {
 	}{
 		{name: "get", reqUrl: "http://localhost:2376/get/10", method: http.MethodGet},
 		{name: "set", reqUrl: "http://localhost:2376/set", method: http.MethodPost},
+		{name: "get", reqUrl: "http://localhost:2376/flush", method: http.MethodGet},
 	}
 
 	for _, tc := range testcases {

@@ -22,6 +22,7 @@ func newRouter() *mux.Router {
 
 	r.HandleFunc("/get/{key}", app.Get).Methods(http.MethodGet)
 	r.HandleFunc("/set", app.Set).Methods(http.MethodPost)
+	r.HandleFunc("/flush", app.Flush).Methods(http.MethodGet)
 
 	return r
 }

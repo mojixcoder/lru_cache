@@ -137,3 +137,34 @@ func TestGetSetPanics(t *testing.T) {
 		cache.Get(nil, "")
 	})
 }
+
+func TestFlush(t *testing.T) {
+	cache := NewCache()
+
+	cache.set("first_key", 1)
+
+	cache.flush()
+
+	_, err := cache.get("first_key")
+	assert.ErrorIs(t, err, ErrNotFound)
+	assert.Zero(t, cache.list.Size())
+	assert.Empty(t, cache.storage)
+}
+
+func TestFlushContext(t *testing.T) {
+	cache := NewCache()
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	err := cache.Flush(ctx)
+	assert.NoError(t, err)
+
+	cancel()
+
+	err = cache.Flush(ctx)
+	assert.ErrorIs(t, err, ctx.Err())
+
+	assert.Panics(t, func() {
+		cache.Flush(nil)
+	})
+}

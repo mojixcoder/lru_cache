@@ -1,9 +1,8 @@
-
 ### LRU Cache implementation in Golang (Least Recently Used Items)
 ___
 
 This is a `LRU Cache` HTTP server which has two endpoints to get and set stuff to cache.  
-Both `SET` and `GET` operations have **O(1)** time complexity.
+All of the `SET`, `GET` and `FLUSH` operations have **O(1)** time complexity.
 
 #### Setup
 
@@ -22,11 +21,21 @@ curl http://127.0.0.1:2376/get/first_key
 // Response
 {"key":"first_key","value":[1,"val"]}
 ```
+
+to flush the whole cache:
+```
+curl http://127.0.0.1:2376/flush
+
+// Response 
+{"message": "ok"}
+```
+
 #### Endpoints
 
  1. GET `/get/{key}`
  2. POST `/set`
     - request body `{"key": "string", "value": any}`
+ 3. GET `/flush`
  
 #### Config Environment Variables
  1. **CACHE_CAPACITY:** maximum stored key-value pairs. defaults to `2048`.
