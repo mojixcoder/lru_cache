@@ -7,7 +7,7 @@ Both `SET` and `GET` operations have **O(1)** time complexity.
 
 #### Setup
 
- Just run server using this command `go run go run cmd/lrucache/main.go`.  
+ Just run server using this command `go run cmd/lrucache/main.go`.  
 Now you can store key-value pairs in the cache like this:  
 ```
 curl --request POST --data '{"key":"first_key","value":[1, "val"]}' http://127.0.0.1:2376/set
